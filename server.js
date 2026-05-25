@@ -92,6 +92,7 @@ app.get('/api/items', (req, res) => {
     const items = dbHelper.getAllItems();
     res.json(items);
   } catch (err) {
+    console.error('Error in GET /api/items:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -105,6 +106,7 @@ app.get('/api/items/:id', (req, res) => {
     }
     res.json(item);
   } catch (err) {
+    console.error('Error in GET /api/items/' + req.params.id, err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -119,6 +121,7 @@ app.post('/api/items', (req, res) => {
     const newItem = dbHelper.addItem(itemData);
     res.status(201).json(newItem);
   } catch (err) {
+    console.error('Error in POST /api/items:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -127,12 +130,14 @@ app.post('/api/items', (req, res) => {
 app.put('/api/items/:id', (req, res) => {
   try {
     const itemData = req.body;
+    console.log('PUT /api/items/' + req.params.id, JSON.stringify(itemData, null, 2));
     const updated = dbHelper.updateItem(req.params.id, itemData);
     if (!updated) {
       return res.status(404).json({ error: 'Item no encontrado o sin cambios' });
     }
     res.json(updated);
   } catch (err) {
+    console.error('Error in PUT /api/items/' + req.params.id, err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -146,6 +151,7 @@ app.delete('/api/items/:id', (req, res) => {
     }
     res.json({ success: true });
   } catch (err) {
+    console.error('Error in DELETE /api/items/' + req.params.id, err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -156,6 +162,7 @@ app.get('/api/stats', (req, res) => {
     const stats = dbHelper.getStats();
     res.json(stats);
   } catch (err) {
+    console.error('Error in GET /api/stats:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -169,6 +176,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     const localUrl = `/uploads/${req.file.filename}`;
     res.json({ url: localUrl });
   } catch (err) {
+    console.error('Error in POST /api/upload:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -189,6 +197,7 @@ app.post('/api/upload-url', async (req, res) => {
       res.json({ url: url, fallback: true });
     }
   } catch (err) {
+    console.error('Error in POST /api/upload-url:', err);
     res.status(500).json({ error: err.message });
   }
 });
