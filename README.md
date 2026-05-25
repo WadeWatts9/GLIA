@@ -2,6 +2,10 @@
 
 GLIA es una aplicación web responsiva y dockerizada diseñada para catalogar y realizar un seguimiento inteligente de tu consumo de medios: **películas**, **series** y **libros**. 
 
+El nombre **GLIA** proviene de las células gliales (o glía), las cuales tradicionalmente eran consideradas el simple "pegamento" de las neuronas, pero que la neurociencia moderna reconoce como participantes activas y fundamentales en la formación, consolidación y almacenamiento de la memoria, así como en la plasticidad sináptica (los astrocitos modulan las conexiones neuronales y aportan energía metabólica, mientras que la microglía esculpe los circuitos eliminando conexiones débiles). De manera análoga, esta aplicación funciona como ese soporte de memoria que ayuda a consolidar, estructurar y dar seguimiento a nuestras experiencias de consumo multimedia.
+
+Este proyecto surge como respuesta a una necesidad personal como desarrollador: la de llevar adelante un registro propio, personalizado y autocontenido de mis consumos multimedia cotidianos, sin depender de plataformas externas de terceros y manteniendo el control absoluto sobre mis datos.
+
 La aplicación destaca por su estética moderna *dark-navy* con efectos de *glassmorphism*, control nativo de superposiciones (`<dialog>`), uso de la cámara web para capturas de portadas y persistencia de datos local robusta.
 
 ---
