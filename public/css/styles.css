@@ -1247,6 +1247,16 @@ textarea:focus {
 }
 
 /* Detailed Preview Modal styles */
+dialog#explore-modal {
+  max-width: 1000px;
+  width: 95%;
+}
+
+dialog#preview-modal {
+  max-width: 720px;
+  width: 90%;
+}
+
 .modal-content-md {
   max-width: 720px;
   width: 90%;

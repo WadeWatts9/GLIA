@@ -893,7 +893,11 @@ function openItemModal(item = null, defaultType = 'movie') {
     // Image preview
     if (item.image_url) {
       elements.finalImageUrl.value = item.image_url;
-      elements.itemImageUrl.value = item.image_url;
+      if (item.image_url.startsWith('http://') || item.image_url.startsWith('https://')) {
+        elements.itemImageUrl.value = item.image_url;
+      } else {
+        elements.itemImageUrl.value = '';
+      }
       elements.imageThumbnailPreview.src = item.image_url;
       elements.imagePreviewThumbContainer.classList.remove('hidden');
     }
