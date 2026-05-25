@@ -1,0 +1,16 @@
+services:
+  glia-app:
+    container_name: glia-app
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - glia-data:/app/data
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+
+volumes:
+  glia-data:
+    name: glia-data

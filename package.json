@@ -1,0 +1,17 @@
+{
+  "name": "glia",
+  "version": "1.0.0",
+  "description": "Catalog and tracking application for movies, series, and books.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}
