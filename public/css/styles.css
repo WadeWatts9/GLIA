@@ -663,16 +663,35 @@ dialog[open]::backdrop {
   display: flex;
   flex-direction: column;
   max-height: 90vh;
+  width: 100%;
 }
 
-.modal-content-lg {
-  max-width: 1000px;
-  width: 95%;
-}
-
+.modal-content-lg,
+.modal-content-md,
 .modal-content-sm {
+  width: 100%;
+}
+
+/* Specific dialog sizing overrides */
+dialog#item-modal {
+  max-width: 600px;
+  width: 90%;
+}
+
+dialog#camera-modal,
+dialog#progress-modal {
   max-width: 420px;
   width: 90%;
+}
+
+dialog#preview-modal {
+  max-width: 720px;
+  width: 90%;
+}
+
+dialog#explore-modal {
+  max-width: 1000px;
+  width: 95%;
 }
 
 .modal-header {
@@ -1247,20 +1266,6 @@ textarea:focus {
 }
 
 /* Detailed Preview Modal styles */
-dialog#explore-modal {
-  max-width: 1000px;
-  width: 95%;
-}
-
-dialog#preview-modal {
-  max-width: 720px;
-  width: 90%;
-}
-
-.modal-content-md {
-  max-width: 720px;
-  width: 90%;
-}
 
 .preview-modal-body {
   padding: 24px;
