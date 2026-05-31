@@ -152,8 +152,10 @@ cd GLIA
 
 > ⚠️ **Importante:** Siempre usá `--build` en el primer deploy o después de actualizar el código. Esto garantiza que Docker recompile la imagen con las últimas dependencias (incluyendo `better-sqlite3`).
 
+> 📋 **Compatibilidad con ZimaOS / CasaOS:** Estas plataformas incluyen Docker en su versión *standalone* (V1), que usa el comando `docker-compose` con guion. Si al ejecutar `docker compose` (sin guion) recibís el error `unknown shorthand flag: 'd'`, usá `docker-compose` en su lugar. Todos los comandos de esta guía están escritos con el formato compatible.
+
 ```bash
-docker compose up -d --build
+sudo docker-compose up -d --build
 ```
 
 Este comando:
@@ -167,13 +169,13 @@ Este comando:
 #### 3. Verificar que el contenedor está corriendo
 
 ```bash
-docker compose ps
+sudo docker-compose ps
 ```
 
 Deberías ver el contenedor `glia-app` con estado `Up`. Para ver los logs en tiempo real:
 
 ```bash
-docker compose logs -f
+sudo docker-compose logs -f
 ```
 
 #### 4. Acceder a la aplicación
@@ -196,7 +198,7 @@ Cuando haya cambios nuevos en el repositorio:
 
 ```bash
 git pull
-docker compose up -d --build
+sudo docker-compose up -d --build
 ```
 
 Tus datos (base de datos y portadas) se conservan intactos gracias al volumen `glia-data`.
@@ -206,12 +208,12 @@ Tus datos (base de datos y portadas) se conservan intactos gracias al volumen `g
 ### 🛑 Detener el contenedor
 
 ```bash
-docker compose down
+sudo docker-compose down
 ```
 
 > Esto **no elimina** el volumen de datos. Para eliminar también los datos (¡irreversible!):
 > ```bash
-> docker compose down -v
+> sudo docker-compose down -v
 > ```
 
 ---
@@ -222,10 +224,10 @@ Todos los datos persistentes (base de datos SQLite y portadas) se almacenan en e
 
 ```bash
 # Encontrar la ruta física del volumen
-docker volume inspect glia-data
+sudo docker volume inspect glia-data
 
 # Copiar el contenido a una carpeta local
-docker run --rm -v glia-data:/data -v $(pwd):/backup alpine \
+sudo docker run --rm -v glia-data:/data -v $(pwd):/backup alpine \
   tar czf /backup/glia-backup-$(date +%Y%m%d).tar.gz -C /data .
 ```
 
