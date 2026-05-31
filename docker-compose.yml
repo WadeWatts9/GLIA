@@ -1,7 +1,7 @@
 services:
   glia-app:
     container_name: glia-app
-    build: .
+    image: ghcr.io/wadewatts9/glia:latest
     ports:
       - "3000:3000"
     volumes:

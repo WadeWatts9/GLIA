@@ -129,56 +129,58 @@ GLIA/
 
 ## 🚀 Guía de Deploy
 
+La imagen de GLIA se construye automáticamente en GitHub Actions y se publica en el registro de contenedores de GitHub (`ghcr.io`) con cada push a `main`. No es necesario compilar nada en el servidor.
+
 ### Requisitos Previos
-- **Docker** y **Docker Compose** instalados y en ejecución.
-- **Git** instalado (para clonar el repositorio en el servidor).
+- **Docker** instalado y en ejecución (no se necesita Docker Compose).
+- **Git** instalado (solo si querés clonar el repo para actualizar fácilmente).
 
 ---
 
 ### 🖥️ Deploy en Servidor (ZimaOS / Linux / NAS)
 
-Esta es la forma recomendada para correr GLIA en un servidor doméstico o NAS con ZimaOS, Unraid, TrueNAS, Ubuntu Server, o cualquier distribución Linux con Docker.
+#### Opción A — Con un solo comando `docker run` (recomendado para ZimaOS)
 
-#### 1. Clonar el repositorio
+No necesitás clonar el repositorio ni tener Docker Compose. Solo ejecutá:
 
-Conéctate al servidor por SSH y clona el proyecto:
+```bash
+docker run -d \
+  --name glia-app \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -v glia-data:/app/data \
+  ghcr.io/wadewatts9/glia:latest
+```
+
+Docker descargará la imagen automáticamente y levantará el servidor.
+
+#### Opción B — Con Docker Compose
+
+Si tenés Docker Compose disponible, cloná el repositorio y ejecutá:
 
 ```bash
 git clone https://github.com/WadeWatts9/GLIA.git
 cd GLIA
+docker compose up -d
 ```
 
-#### 2. Construir y levantar el contenedor
+> Sin `--build`, ya que la imagen se descarga directamente desde `ghcr.io`.
 
-> ⚠️ **Importante:** Siempre usá `--build` en el primer deploy o después de actualizar el código. Esto garantiza que Docker recompile la imagen con las últimas dependencias (incluyendo `better-sqlite3`).
+---
 
-> 📋 **Compatibilidad con ZimaOS / CasaOS:** Estas plataformas incluyen Docker en su versión *standalone* (V1), que usa el comando `docker-compose` con guion. Si al ejecutar `docker compose` (sin guion) recibís el error `unknown shorthand flag: 'd'`, usá `docker-compose` en su lugar. Todos los comandos de esta guía están escritos con el formato compatible.
+#### Verificar que el contenedor está corriendo
 
 ```bash
-sudo docker-compose up -d --build
+docker ps
 ```
 
-Este comando:
-1. Descarga la imagen base `node:24-alpine`.
-2. Instala las herramientas de compilación necesarias para `better-sqlite3` (`python3`, `make`, `g++`).
-3. Ejecuta `npm ci --omit=dev` para instalar solo dependencias de producción y compilar el módulo nativo.
-4. Elimina las herramientas de compilación para mantener la imagen liviana.
-5. Crea el volumen persistente `glia-data` (base de datos SQLite + portadas subidas).
-6. Levanta el servidor en el puerto **3000**.
-
-#### 3. Verificar que el contenedor está corriendo
+Deberías ver `glia-app` con estado `Up`. Para ver los logs en tiempo real:
 
 ```bash
-sudo docker-compose ps
+docker logs -f glia-app
 ```
 
-Deberías ver el contenedor `glia-app` con estado `Up`. Para ver los logs en tiempo real:
-
-```bash
-sudo docker-compose logs -f
-```
-
-#### 4. Acceder a la aplicación
+#### Acceder a la aplicación
 
 Desde cualquier dispositivo en tu red local:
 
@@ -194,11 +196,18 @@ Por ejemplo: `http://192.168.1.100:3000`
 
 ### 🔄 Actualizar GLIA a una nueva versión
 
-Cuando haya cambios nuevos en el repositorio:
+Cuando haya una nueva versión publicada:
 
 ```bash
-git pull
-sudo docker-compose up -d --build
+docker pull ghcr.io/wadewatts9/glia:latest
+docker stop glia-app
+docker rm glia-app
+docker run -d \
+  --name glia-app \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -v glia-data:/app/data \
+  ghcr.io/wadewatts9/glia:latest
 ```
 
 Tus datos (base de datos y portadas) se conservan intactos gracias al volumen `glia-data`.
@@ -208,12 +217,13 @@ Tus datos (base de datos y portadas) se conservan intactos gracias al volumen `g
 ### 🛑 Detener el contenedor
 
 ```bash
-sudo docker-compose down
+docker stop glia-app
 ```
 
 > Esto **no elimina** el volumen de datos. Para eliminar también los datos (¡irreversible!):
 > ```bash
-> sudo docker-compose down -v
+> docker stop glia-app && docker rm glia-app
+> docker volume rm glia-data
 > ```
 
 ---
@@ -223,11 +233,10 @@ sudo docker-compose down
 Todos los datos persistentes (base de datos SQLite y portadas) se almacenan en el volumen Docker `glia-data`. Para hacer un backup manual:
 
 ```bash
-# Encontrar la ruta física del volumen
-sudo docker volume inspect glia-data
-
-# Copiar el contenido a una carpeta local
-sudo docker run --rm -v glia-data:/data -v $(pwd):/backup alpine \
+docker run --rm \
+  -v glia-data:/data \
+  -v $(pwd):/backup \
+  alpine \
   tar czf /backup/glia-backup-$(date +%Y%m%d).tar.gz -C /data .
 ```
 
@@ -246,3 +255,4 @@ Si deseas ejecutar la aplicación sin Docker (requiere Node.js >= v22.5.0 y herr
    npm start
    ```
 3. La aplicación estará activa en: **`http://localhost:3000`**.
+
