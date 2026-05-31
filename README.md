@@ -12,12 +12,12 @@ La aplicación destaca por su estética moderna *dark-navy* con efectos de *glas
 
 ## 🛠️ Tecnologías Utilizadas
 
-La arquitectura de GLIA está diseñada para ser extremadamente ligera, auto-contenida, segura y portable a cualquier arquitectura (x86_64 y ARM64):
+La arquitectura de GLIA está diseñada para ser extremadamente ligera, auto-contenida, segura y libre de dependencias nativas de compilación:
 
 ### Backend
 - **Node.js (v24)**: Entorno de ejecución principal.
 - **Express.js (v4.19)**: Servidor web y router para APIs REST y archivos estáticos.
-- **`better-sqlite3`**: Librería SQLite madura y estable de alto rendimiento. Compila un módulo nativo en C++ durante la construcción de la imagen Docker (las herramientas necesarias se incluyen y eliminan automáticamente del Dockerfile para mantener la imagen liviana). Compatible con cualquier arquitectura soportada por Alpine Linux (x86_64, ARM64).
+- **`node:sqlite` (Nativo)**: Base de datos SQLite integrada en Node.js desde v22.5.0, estabilizada en Node.js 24 (sin requerir flags experimentales). Al ser nativa del runtime, no necesita dependencias externas ni compilación de código C++, logrando builds instantáneos y portables a cualquier arquitectura (ARM64, x86_64).
 - **Multer**: Middleware para gestionar subidas de archivos en formato `multipart/form-data`.
 - **Fetch API (Nativo)**: Usado para descargar imágenes externas directamente al almacenamiento local en el servidor, protegiendo al usuario de enlaces caídos o problemas de CORS.
 
@@ -111,7 +111,7 @@ GLIA/
 ├── docker-compose.yml          # Orquestación y persistencia de volúmenes
 ├── package.json                # Definición de dependencias npm
 ├── server.js                   # Servidor Express, APIs de subida y descargas
-├── database.js                 # Inicialización y queries de SQLite (better-sqlite3)
+├── database.js                 # Inicialización y queries de SQLite (node:sqlite nativo)
 ├── data/                       # Carpeta persistente mapeada en Docker
 │   ├── glia.db                 # Archivo de Base de Datos SQLite
 │   └── uploads/                # Archivo físico de portadas (subidas/cámara/url)

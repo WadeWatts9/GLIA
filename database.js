@@ -1,4 +1,4 @@
-const Database = require('better-sqlite3');
+const { DatabaseSync } = require('node:sqlite');
 const path = require('path');
 const fs = require('fs');
 
@@ -15,7 +15,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 
 const DB_PATH = path.join(DATA_DIR, 'glia.db');
-const db = new Database(DB_PATH);
+const db = new DatabaseSync(DB_PATH);
 
 // Initialize DB schema
 db.exec(`

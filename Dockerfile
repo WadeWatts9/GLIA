@@ -4,20 +4,14 @@ FROM node:24-alpine
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Install build tools required for better-sqlite3 (native C++ module)
-RUN apk add --no-cache python3 make g++
-
 # Create app directory
 WORKDIR /app
 
 # Copy dependency manifests
 COPY package*.json ./
 
-# Install production-only dependencies (compiles better-sqlite3)
+# Install production-only dependencies
 RUN npm ci --omit=dev
-
-# Remove build tools to keep the image lean
-RUN apk del python3 make g++
 
 # Copy server code and static assets
 COPY server.js database.js ./
