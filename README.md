@@ -12,12 +12,12 @@ La aplicación destaca por su estética moderna *dark-navy* con efectos de *glas
 
 ## 🛠️ Tecnologías Utilizadas
 
-La arquitectura de GLIA está diseñada para ser extremadamente ligera, auto-contenida, segura y libre de problemas de compilación nativa en entornos de contenedores:
+La arquitectura de GLIA está diseñada para ser extremadamente ligera, auto-contenida, segura y portable a cualquier arquitectura (x86_64 y ARM64):
 
 ### Backend
 - **Node.js (v24)**: Entorno de ejecución principal.
 - **Express.js (v4.19)**: Servidor web y router para APIs REST y archivos estáticos.
-- **`node:sqlite` (Nativo)**: Base de datos SQLite experimental introducida nativamente en Node.js (desde v22.5.0). Al no requerir dependencias externas como `sqlite3` o `better-sqlite3`, se elimina la necesidad de compilar código C++ en Docker, logrando compilaciones instantáneas y portables a cualquier arquitectura (ARM64, x86_64).
+- **`better-sqlite3`**: Librería SQLite madura y estable de alto rendimiento. Compila un módulo nativo en C++ durante la construcción de la imagen Docker (las herramientas necesarias se incluyen y eliminan automáticamente del Dockerfile para mantener la imagen liviana). Compatible con cualquier arquitectura soportada por Alpine Linux (x86_64, ARM64).
 - **Multer**: Middleware para gestionar subidas de archivos en formato `multipart/form-data`.
 - **Fetch API (Nativo)**: Usado para descargar imágenes externas directamente al almacenamiento local en el servidor, protegiendo al usuario de enlaces caídos o problemas de CORS.
 
@@ -111,7 +111,7 @@ GLIA/
 ├── docker-compose.yml          # Orquestación y persistencia de volúmenes
 ├── package.json                # Definición de dependencias npm
 ├── server.js                   # Servidor Express, APIs de subida y descargas
-├── database.js                 # Inicialización y queries de SQLite (node:sqlite)
+├── database.js                 # Inicialización y queries de SQLite (better-sqlite3)
 ├── data/                       # Carpeta persistente mapeada en Docker
 │   ├── glia.db                 # Archivo de Base de Datos SQLite
 │   └── uploads/                # Archivo físico de portadas (subidas/cámara/url)
@@ -127,28 +127,113 @@ GLIA/
 
 ---
 
-## 🚀 Guía de Inicio
+## 🚀 Guía de Deploy
 
 ### Requisitos Previos
 - **Docker** y **Docker Compose** instalados y en ejecución.
+- **Git** instalado (para clonar el repositorio en el servidor).
 
-### Ejecución con Docker (Recomendado)
-Para iniciar la aplicación de forma rápida con persistencia configurada, abre tu terminal en el directorio raíz del proyecto y ejecuta:
+---
+
+### 🖥️ Deploy en Servidor (ZimaOS / Linux / NAS)
+
+Esta es la forma recomendada para correr GLIA en un servidor doméstico o NAS con ZimaOS, Unraid, TrueNAS, Ubuntu Server, o cualquier distribución Linux con Docker.
+
+#### 1. Clonar el repositorio
+
+Conéctate al servidor por SSH y clona el proyecto:
 
 ```bash
-docker compose up -d
+git clone https://github.com/WadeWatts9/GLIA.git
+cd GLIA
+```
+
+#### 2. Construir y levantar el contenedor
+
+> ⚠️ **Importante:** Siempre usá `--build` en el primer deploy o después de actualizar el código. Esto garantiza que Docker recompile la imagen con las últimas dependencias (incluyendo `better-sqlite3`).
+
+```bash
+docker compose up -d --build
 ```
 
 Este comando:
-1. Compilará la imagen de Node.js v24.
-2. Descargará las dependencias de producción.
-3. Creará el volumen con nombre `glia-data` (donde se guardarán tus bases de datos y portadas).
-4. Levantará el servidor en el puerto **3000**.
+1. Descarga la imagen base `node:24-alpine`.
+2. Instala las herramientas de compilación necesarias para `better-sqlite3` (`python3`, `make`, `g++`).
+3. Ejecuta `npm ci --omit=dev` para instalar solo dependencias de producción y compilar el módulo nativo.
+4. Elimina las herramientas de compilación para mantener la imagen liviana.
+5. Crea el volumen persistente `glia-data` (base de datos SQLite + portadas subidas).
+6. Levanta el servidor en el puerto **3000**.
 
-Accede a la app en: **[http://localhost:3000](http://localhost:3000)**.
+#### 3. Verificar que el contenedor está corriendo
 
-### Ejecución Local en Desarrollo
-Si deseas ejecutar la aplicación sin Docker (requiere Node.js >= v22.5.0):
+```bash
+docker compose ps
+```
+
+Deberías ver el contenedor `glia-app` con estado `Up`. Para ver los logs en tiempo real:
+
+```bash
+docker compose logs -f
+```
+
+#### 4. Acceder a la aplicación
+
+Desde cualquier dispositivo en tu red local:
+
+```
+http://<IP-DEL-SERVIDOR>:3000
+```
+
+Por ejemplo: `http://192.168.1.100:3000`
+
+> 💡 En ZimaOS podés encontrar la IP del servidor en el panel de control, o ejecutando `ip addr` en la terminal.
+
+---
+
+### 🔄 Actualizar GLIA a una nueva versión
+
+Cuando haya cambios nuevos en el repositorio:
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+Tus datos (base de datos y portadas) se conservan intactos gracias al volumen `glia-data`.
+
+---
+
+### 🛑 Detener el contenedor
+
+```bash
+docker compose down
+```
+
+> Esto **no elimina** el volumen de datos. Para eliminar también los datos (¡irreversible!):
+> ```bash
+> docker compose down -v
+> ```
+
+---
+
+### 💾 Backup de datos
+
+Todos los datos persistentes (base de datos SQLite y portadas) se almacenan en el volumen Docker `glia-data`. Para hacer un backup manual:
+
+```bash
+# Encontrar la ruta física del volumen
+docker volume inspect glia-data
+
+# Copiar el contenido a una carpeta local
+docker run --rm -v glia-data:/data -v $(pwd):/backup alpine \
+  tar czf /backup/glia-backup-$(date +%Y%m%d).tar.gz -C /data .
+```
+
+---
+
+### 🧑‍💻 Ejecución Local en Desarrollo
+
+Si deseas ejecutar la aplicación sin Docker (requiere Node.js >= v22.5.0 y herramientas de compilación nativas instaladas):
 
 1. Instala las dependencias:
    ```bash
